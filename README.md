@@ -25,7 +25,7 @@ This project demonstrates the use of the `Xenova/gpt-3.5-turbo` model for interp
 1. **Clone the repository**:
 
    ```bash
-   git clone <https://github.com/haratimo/MetaphorTaskStep>
+   git clone <https://github.com/haratimo/MetaphorTaskStep.git>
    cd <MetaphorTaskStep>
    ```
 
