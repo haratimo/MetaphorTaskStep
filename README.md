@@ -1,4 +1,4 @@
-# metaphor_interpreter info
+# Metaphor_interpreter info
 
 ---
 
