@@ -10,33 +10,55 @@ huggingface_token = os.getenv('HUGGINGFACE_TOKEN')
 if not huggingface_token:
     raise ValueError("Hugging Face API token not found. Please store it in a .env file.")
 
-# Initialize the Xenova/gpt-3.5-turbo model from Hugging Face
-# We use the 'text-generation' pipeline for generating text based on the input metaphor.
+# Initialize the pipelines for various tasks
+# Xenova/gpt-3.5-turbo for text generation
 generator = pipeline('text-generation', model='Xenova/gpt-3.5-turbo', use_auth_token=huggingface_token)
+# Sentiment analysis pipeline for understanding the emotional tone of the interpretation
+sentiment_analyzer = pipeline('sentiment-analysis')
+# Named entity recognition pipeline for identifying entities in the metaphor interpretation
+ner = pipeline('ner')
+
 set_seed(42)  # Set seed for reproducibility
 
 def interpret_metaphor(metaphor):
     """
-    Function to interpret a nominal metaphor using the Xenova/gpt-3.5-turbo model.
+    Function to interpret a nominal metaphor using advanced NLP techniques.
     
     Args:
     metaphor (str): The metaphor in the format 'X is Y'.
     
     Returns:
-    str: The model's interpretation or explanation of the metaphor.
+    dict: The model's interpretation, sentiment analysis, and named entities recognized.
     """
-    # Create a prompt for the model to generate text based on the metaphor
+    # Generate a detailed interpretation of the metaphor
     prompt = f"Explain the metaphor: '{metaphor}' in a detailed and insightful manner."
+    interpretation = generator(prompt, max_length=100, num_return_sequences=1)[0]['generated_text']
     
-    # Generate a response from the model based on the prompt
-    response = generator(prompt, max_length=100, num_return_sequences=1)
+    # Perform sentiment analysis on the generated interpretation
+    sentiment = sentiment_analyzer(interpretation)
     
-    # Return the generated text as the model's interpretation of the metaphor
-    return response[0]['generated_text']
+    # Perform named entity recognition on the generated interpretation
+    entities = ner(interpretation)
+    
+    # Consolidate results into a single dictionary
+    results = {
+        'interpretation': interpretation,
+        'sentiment': sentiment,
+        'named_entities': entities
+    }
+    
+    return results
 
 # Example usage of the function with a sample metaphor
 sample_metaphor = "a door is a beginning"
-interpretation = interpret_metaphor(sample_metaphor)
+results = interpret_metaphor(sample_metaphor)
 
-# Print the model's interpretation of the metaphor
-print(interpretation)
+# Print the detailed results
+print("Interpretation:")
+print(results['interpretation'])
+print("\nSentiment Analysis:")
+print(results['sentiment'])
+print("\nNamed Entities Recognized:")
+for entity in results['named_entities']:
+    print(f" - {entity['word']}, Type: {entity['entity']}")
+
